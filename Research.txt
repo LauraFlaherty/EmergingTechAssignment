@@ -1,0 +1,29 @@
+Adapted from: https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/
+
+Why do we need to create a python virtual environment? 
+Python programs often use packages and modules that don’t come as part of the standard library. 
+These packages may have several release versions. So, quite often we might find ourselves in situations 
+where one of the running applications might need a package of one version while the other needs the same 
+package but of a different version. This will lead to conflicts. To solve this conflict, we need python 
+virtual environment.
+
+NOTE λ at start of line indicates input in terminal 
+
+How to set up a virtual environment? 
+
+1.Check conda is installed and available: 
+C:\........\EmergingTechAssignment (master -> origin)
+λ conda -V
+conda 4.7.12
+
+2. Update conda if necessary
+λ conda update conda
+
+
+3. Create a virtual environment
+
+Activate a virtual environment
+Install additional python packages
+Deactivate a virtual environment
+Delete a virtual environment
+
