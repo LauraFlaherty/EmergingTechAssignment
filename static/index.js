@@ -6,13 +6,14 @@
   canvas.height = 280;
   var Mouse = { x: 0, y: 0 };
   var lastMouse = { x: 0, y: 0 };
-  context.fillStyle="black";
+  context.fillStyle="white";
   context.fillRect(0,0,canvas.width,canvas.height);
-  context.color = "white";
-  context.lineWidth = 15;
+  context.color = "black";
+  context.lineWidth = 10;
     context.lineJoin = context.lineCap = 'round';
   
   debug();
+  
   canvas.addEventListener( "mousemove", function( e )
   {
     lastMouse.x = Mouse.x;
@@ -22,12 +23,18 @@
   }, false );
   canvas.addEventListener( "mousedown", function( e )
   {
+	  
     canvas.addEventListener( "mousemove", onPaint, false );
+	
   }, false );
+  
   canvas.addEventListener( "mouseup", function()
   {
+	  
     canvas.removeEventListener( "mousemove", onPaint, false );
+	
   }, false );
+  
   var onPaint = function()
   {  
     context.lineWidth = context.lineWidth;
@@ -41,6 +48,7 @@
     context.closePath();
     context.stroke();
   };
+  
   function debug()
   {
     /* CLEAR BUTTON */
@@ -50,19 +58,12 @@
     {
       
         context.clearRect( 0, 0, 280, 280 );
-        context.fillStyle="black";
+        context.fillStyle="white";
         context.fillRect(0,0,canvas.width,canvas.height);
       
     });
     
-    /* LINE WIDTH */
-    var slider = document.getElementById("myRange");
-    var output = document.getElementById("sliderValue");
-    output.innerHTML = slider.value;
-    slider.oninput = function() {
-      output.innerHTML = this.value;
-      context.lineWidth = $( this ).val();
-    }
+
     
     $( "#lineWidth" ).change(function()
     {
