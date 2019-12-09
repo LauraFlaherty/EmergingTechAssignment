@@ -11,27 +11,27 @@ import tensorflow as tf
 from keras.models import model_from_json
 # Path to our saved model
 sys.path.append(os.path.abspath("./model"))
-#from load import *
 
 
 # Initialize flask app
 app = Flask(__name__)
-def init_model():
-	json_file = open('model.json','r')
-	loaded_model_json = json_file.read()
-	json_file.close()
-	loaded_model = model_from_json(loaded_model_json)
-	#load weights into new model
-	loaded_model.load_weights("model.h5")
-	print("Loaded Model from disk")
-	#compile and evaluate loaded model
-	loaded_model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
-	graph = tf.get_default_graph()
-	return loaded_model,graph
 
-		#Initialize some global variables
+# initialize variables
 global model, graph
-model, graph = init_model()
+model,graph = load()
+
+def load():
+  json_file = open('model.json','r')
+  loaded_model_json = json_file.read()
+  json_file.close()
+  loaded_model = model_from_json(loaded_model_json)
+  #load weights into new model
+  loaded_model.load_weights("model.h5")
+  print("Loaded Model from disk")
+  #compile and evaluate loaded model
+  loaded_model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+  graph = tf.get_default_graph()
+  return loaded_model,graph
 
 def convertImage(imgData1):
   imgstr = re.search(r'base64,(.*)', str(imgData1)).group(1)
@@ -42,7 +42,7 @@ def index():
   return render_template("index.html")
 @app.route('/predict/', methods=['GET', 'POST'])
 def predict():
-  
+ 
   # Predict method is called when we push the 'Predict' button 
   # on the webpage. We will feed the user drawn image to the model
   # perform inference, and return the classification
