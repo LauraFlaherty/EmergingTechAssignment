@@ -1,67 +1,65 @@
-# requests are objects that flask handles (get set post, etc)
+# Import flask which will handle our communication with the frontend
+# Also import few other libraries
 from flask import Flask, render_template, request
-# scientific computing library for saving, reading, and resizing images
-from scipy.misc import imsave, imread, imresize
-# for matrix math
+from scipy.misc import imread, imresize, imsave
 import numpy as np
-# for regular expressions, saves time dealing with string data
 import re
-# system level operations (like loading files)
 import sys
-# for reading operating system data
-import os
-#tensorflow
-import tensorflow as tf
-# tell our app where our saved model is
-sys.path.append(os.path.abspath('./model'))
-from load import *
-# initalize our flask app
-app = Flask(__name__)
-
-# global vars for easy reusability
-global model, graph
-# initialize these variables
-model, graph = init()
-
 import base64
-# decoding an image from base64 into raw representation
-def convertImage(imgData):
-    imgstr = re.search(r'base64,(.*)', str(imgData1)).group(1)
-    with open('output.png', 'wb') as output:
-        output.write(imgstr.decode('base64'))
-		
+import os
+import tensorflow as tf
+from keras.models import model_from_json
+# Path to our saved model
+sys.path.append(os.path.abspath("./model"))
+#from load import *
+
+
+# Initialize flask app
+app = Flask(__name__)
+def init_model():
+	json_file = open('model.json','r')
+	loaded_model_json = json_file.read()
+	json_file.close()
+	loaded_model = model_from_json(loaded_model_json)
+	#load weights into new model
+	loaded_model.load_weights("model.h5")
+	print("Loaded Model from disk")
+	#compile and evaluate loaded model
+	loaded_model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+	graph = tf.get_default_graph()
+	return loaded_model,graph
+
+		#Initialize some global variables
+global model, graph
+model, graph = init_model()
+
+def convertImage(imgData1):
+  imgstr = re.search(r'base64,(.*)', str(imgData1)).group(1)
+  with open('output.png', 'wb') as output:
+    output.write(base64.b64decode(imgstr))
 @app.route('/')
 def index():
-    return render_template("index.html")
-	
+  return render_template("index.html")
 @app.route('/predict/', methods=['GET', 'POST'])
 def predict():
-		# whenever the predict method is called, we're going
-		# to input the user drawn character as an image into the model
-		# perform inference, and return the classification
-		# get the raw data format of the image
-		imgData = request.get_data()
-		# encode it into a suitable format
-		convertImage(imgData)
-		# read the image into memory
-		x = imread('output.png', mode='L')
-		x = np.invert(x)
-		# make it the right size
-		x = imresize(x, 28, 28)
-		# imsave('final_image.jpg', x)
-		# convert to a 4D tensor to feed into our model
-		x = x.reshape(1, 28, 28, 1)
-		# in our computation graph
-		with graph.as_default():
-			# perform the prediction
-			out = model.predict(x)
-			response = np.array_str(np.argmax(out, axis=1))
-			# convert the response to a string
-			#  response = np.argmax(out, axis=1)
-			#return str(response[0])
-			return response
-		
-		
+  
+  # Predict method is called when we push the 'Predict' button 
+  # on the webpage. We will feed the user drawn image to the model
+  # perform inference, and return the classification
+  imgData = request.get_data()
+  convertImage(imgData)
+  # read the image into memory
+  x = imread('output.png', mode='L')
+  # make it the right size
+  x = imresize(x, (28, 28))/255
+  #You can save the image (optional) to view later
+  imsave('final_image.jpg', x)
+  x = x.reshape(1, 28, 28, 1)
+  with graph.as_default():
+    out = model.predict(x)
+    response = np.argmax(out, axis=1)
+    return str(response[0])
+
 if __name__ == "__main__":
-    # run the app locally on the given port
-    app.run(host='0.0.0.0', port=5000)
+# run the app locally on the given port
+	app.run(host='0.0.0.0', port=5000, threaded=False)
