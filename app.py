@@ -8,7 +8,7 @@ import sys
 import base64
 import os
 import tensorflow as tf
-from keras.models import model_from_json
+from keras.models import model_from_json,load_model
 # Path to our saved model
 sys.path.append(os.path.abspath("./model"))
 
@@ -18,8 +18,16 @@ app = Flask(__name__)
 
 # initialize variables
 global model, graph
-model,graph = load()
 
+graph = tf.get_default_graph()
+
+def load():
+    model = tf.keras.models.load_model('model.h5')
+    return model
+
+model = load()
+# model,graph = load()
+"""
 def load():
   json_file = open('model.json','r')
   loaded_model_json = json_file.read()
@@ -32,6 +40,7 @@ def load():
   loaded_model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
   graph = tf.get_default_graph()
   return loaded_model,graph
+"""
 
 def convertImage(imgData1):
   imgstr = re.search(r'base64,(.*)', str(imgData1)).group(1)
@@ -43,6 +52,7 @@ def index():
 @app.route('/predict/', methods=['GET', 'POST'])
 def predict():
  
+  #model,graph = load()
   # Predict method is called when we push the 'Predict' button 
   # on the webpage. We will feed the user drawn image to the model
   # perform inference, and return the classification
